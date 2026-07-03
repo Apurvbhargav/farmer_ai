@@ -12,7 +12,7 @@ const initialValues = {
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const setToken = useAuthStore((state) => state.setToken);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
@@ -65,12 +65,16 @@ const LoginPage = () => {
       });
 
       if (!data.access_token) {
-        setSubmitError(data.message || 'Invalid credentials');
-        return;
-      }
+  setSubmitError(data.message || 'Invalid credentials');
+  return;
+}
 
-      setToken(data.access_token);
-      navigate('/dashboard');
+setAuth({
+  token: data.access_token,
+  farmer: data.farmer,
+});
+
+navigate('/dashboard');
     } catch (error) {
       setSubmitError(
         error.response?.data?.message ||

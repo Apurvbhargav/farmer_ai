@@ -1,56 +1,95 @@
-import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore.js';
+import {
+  Box,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
+import DashboardLayout from './DashboardLayout';
+import ChatPage from './chat/ChatPage.jsx';
+import { useAuthStore } from '../store/authStore.js'
+
+const dashboardContent = {
+  home: {
+    title: 'Welcome to Farmer AI',
+    description:
+      'Get crop guidance, local insights, and AI-powered support for your farming decisions.',
+  },
+  'previous-chats': {
+    title: 'Previous Chats',
+    description:
+      'Your past conversations will appear here once chat history is connected.',
+  },
+};
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+
+  const farmer = useAuthStore((state) => state.farmer);
   const logout = useAuthStore((state) => state.logout);
+
+  const [activeItem, setActiveItem] = useState('home');
+
+  const username = farmer?.full_name || farmer?.name || 'Farmer';
+
+  const handleNavigate = (item) => {
+    setActiveItem(item);
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        bgcolor: '#f5f7f2',
-        display: 'flex',
-        alignItems: 'center',
-        py: 4,
-      }}
-    >
-      <Container maxWidth="md">
+  const renderContent = () => {
+    if (activeItem === 'new-chat') {
+      return <ChatPage />;
+    }
+
+    const currentContent = dashboardContent[activeItem] || dashboardContent.home;
+
+    return (
+      <Box sx={{ maxWidth: 920 }}>
         <Paper
           elevation={0}
           sx={{
-            p: { xs: 3, sm: 5 },
+            p: { xs: 3, sm: 4 },
             borderRadius: 3,
             border: '1px solid #dfe7d7',
-            textAlign: 'center',
+            bgcolor: '#ffffff',
           }}
         >
-          <Stack spacing={3} alignItems="center">
-            <Typography variant="h3" fontWeight={800} color="#1f3326">
-              Welcome to Farmer AI
+          <Stack spacing={1.5}>
+            <Typography variant="h4" fontWeight={800} color="#1f3326">
+              {currentContent.title}
             </Typography>
 
             <Typography
               variant="body1"
               color="text.secondary"
-              sx={{ maxWidth: 560, lineHeight: 1.7 }}
+              sx={{
+                maxWidth: 680,
+                lineHeight: 1.7,
+              }}
             >
-              Your dashboard is ready.
+              {currentContent.description}
             </Typography>
-
-            <Button variant="contained" onClick={handleLogout}>
-              Logout
-            </Button>
           </Stack>
         </Paper>
-      </Container>
-    </Box>
+      </Box>
+    );
+  };
+
+  return (
+    <DashboardLayout
+      username={username}
+      activeItem={activeItem}
+      onNavigate={handleNavigate}
+      onLogout={handleLogout}
+    >
+      {renderContent()}
+    </DashboardLayout>
   );
 };
 

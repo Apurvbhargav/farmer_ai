@@ -1,11 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const initialState = {
+  token: null,
+  farmer: null,
+};
+
 export const useAuthStore = create(
   persist(
     (set) => ({
-      token: null,
-      farmer: null,
+      ...initialState,
 
       setToken: (token) => {
         set({ token });
@@ -16,18 +20,22 @@ export const useAuthStore = create(
       },
 
       setAuth: ({ token, farmer }) => {
-        set({ token, farmer });
+        set({
+          token,
+          farmer,
+        });
       },
 
       logout: () => {
-        set({
-          token: null,
-          farmer: null,
-        });
+        set(initialState);
       },
     }),
     {
       name: 'farmer-auth-storage',
+      partialize: (state) => ({
+        token: state.token,
+        farmer: state.farmer,
+      }),
     },
   ),
 );
